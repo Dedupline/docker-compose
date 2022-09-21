@@ -204,7 +204,7 @@ services:
 ## SearXNG
 
 ```
-version: '3.9'
+version: '3.7'
 
 networks:
   default:
@@ -213,15 +213,29 @@ networks:
 
 services:
 
+  redis:
+    container_name: redis
+    image: redis:latest
+    command: redis-server --save "" --appendonly "no"
+    tmpfs:
+      - /var/lib/redis
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+
   searxng:
+    container_name: searxng
     image: searxng/searxng:latest
-    container_name: searxng_app
+
     ports:
-     - "<CHANGE_PORT>:8080"
+     - "4001:8080"
     volumes:
       - ./searxng:/etc/searxng:rw
     environment:
-      - SEARXNG_BASE_URL=<YOUR_DOMAIN.TLD>
+      - SEARXNG_BASE_URL=https://${SEARXNG_HOSTNAME:-localhost}/
     cap_drop:
       - ALL
     cap_add:
